@@ -67,7 +67,8 @@ const inputElevation = document.querySelector('.form__input--elevation');
 const succesDisplay = document.querySelector('.succes__display');
 const overlay = document.querySelector('.overlay');
 const errorMsg = document.querySelector('.error__display');
-const btnCloseModal = document.querySelector('.close-modal');
+const btnCloseWindow = document.querySelector('.close-modal');
+const btnDelete = document.querySelector('.delete__btn');
 
 class App {
   // Private variable
@@ -88,6 +89,9 @@ class App {
     inputType.addEventListener('change', this._toogleElevationField);
 
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
+
+    btnDelete.classList.add('hidden');
+    btnDelete.addEventListener('click', this._deleteAll);
   }
   _getPosition() {
     if (navigator.geolocation)
@@ -153,6 +157,7 @@ class App {
     const duration = +inputDuration.value;
     const { lat, lng } = this.#mapEvent.latlng;
     let workout;
+
     // If workout running, create running object
     if (type === 'running') {
       const cadence = +inputCadence.value;
@@ -168,6 +173,7 @@ class App {
         return this._noticeMsg(errorMsg);
 
       workout = new Running([lat, lng], distance, duration, cadence);
+      btnDelete.classList.remove('hidden');
     }
     // If workout cycling, create cycling object
     if (type === 'cycling') {
@@ -179,6 +185,7 @@ class App {
         return this._noticeMsg(errorMsg);
 
       workout = new Cycling([lat, lng], distance, duration, elevation);
+      btnDelete.classList.remove('hidden');
     }
     console.log(workout);
     // Add new object to workout array
@@ -210,7 +217,7 @@ class App {
   }
   _noticeMsg(msg) {
     this._openWindow(msg);
-    btnCloseModal.addEventListener('click', this._closeWindow.bind(null, msg));
+    btnCloseWindow.addEventListener('click', this._closeWindow.bind(null, msg));
     overlay.addEventListener('click', this._closeWindow.bind(null, msg));
   }
   _renderWorkoutMarker(workout) {
@@ -311,9 +318,10 @@ class App {
     });
   }
 
-  reset() {
+  _deleteAll() {
     localStorage.removeItem('workouts');
     location.reload();
+    btnDelete.classList.add('hidden');
   }
 }
 
