@@ -47,7 +47,7 @@ class Cycling extends Workout {
   }
 
   calcSpeed() {
-    this.speed = this.distance / this.duration / 60;
+    this.speed = this.distance / (this.duration / 60);
     return this.spped;
   }
 }
@@ -64,6 +64,10 @@ const inputDistance = document.querySelector('.form__input--distance');
 const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
+const succesDisplay = document.querySelector('.succes__display');
+const overlay = document.querySelector('.overlay');
+const errorMsg = document.querySelector('.error__display');
+const btnCloseModal = document.querySelector('.close-modal');
 
 class App {
   // Private variable
@@ -160,7 +164,8 @@ class App {
         !validInputs(distance, duration, cadence) ||
         !allPositive(distance, duration, cadence)
       )
-        return alert('Inputs have to be positive numbers!');
+        // Display error message
+        return this._noticeMsg(errorMsg);
 
       workout = new Running([lat, lng], distance, duration, cadence);
     }
@@ -171,22 +176,42 @@ class App {
         !validInputs(distance, duration, elevation) ||
         !allPositive(distance, duration)
       )
-        return alert('Inputs have to be positive numbers!');
+        return this._noticeMsg(errorMsg);
 
       workout = new Cycling([lat, lng], distance, duration, elevation);
     }
+    console.log(workout);
     // Add new object to workout array
     this.#workouts.push(workout);
-
     // Render workout on map as marker
     this._renderWorkoutMarker(workout);
     // Render workout on list
     this._renderWorkout(workout);
     // Hide form + clear input fields
     this._hideForm();
-
+    // Display a succesfully message
+    this._succesMgs(succesDisplay);
     // Set local storage to all workouts
     this._setLocalStorage();
+  }
+
+  _closeWindow(msg) {
+    msg.classList.add('hidden');
+    overlay.classList.add('hidden');
+  }
+  _openWindow(msg) {
+    msg.classList.remove('hidden');
+    overlay.classList.remove('hidden');
+  }
+
+  _succesMgs(msg) {
+    this._openWindow(msg);
+    setInterval(this._closeWindow, 3000, msg);
+  }
+  _noticeMsg(msg) {
+    this._openWindow(msg);
+    btnCloseModal.addEventListener('click', this._closeWindow.bind(null, msg));
+    overlay.addEventListener('click', this._closeWindow.bind(null, msg));
   }
   _renderWorkoutMarker(workout) {
     L.marker(workout.coords)
